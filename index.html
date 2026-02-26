@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mediciones - Romero Morato</title>
+
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="empresa-header">
+            <div class="logo-section">
+                <h2>ROMERO MORATO</h2>
+                <p class="sub-logo">REVESTIMIENTOS Y SOLUCIONES ROMERO, S.L.U.</p>
+            </div>
+            <div class="contacto-section">
+                <p>C/ CHAPARRAL Nº 2</p>
+                <p>PUERTO SERRANO (CÁDIZ) C.P.: 11659</p>
+                <p>C.I.F.: B-72378631 | TEL.: 656 978 003</p>
+            </div>
+        </header>
+
+        <section class="form-section">
+            <form id="formMediciones">
+                <div class="info-grid">
+                    <div class="input-group">
+                        <label>OBRA:</label>
+                        <input type="text" id="obra" placeholder="Nombre de la obra">
+                    </div>
+                    <div class="input-group">
+                        <label>TRABAJADOR:</label>
+                        <input type="text" id="trabajador" placeholder="Nombre del operario">
+                    </div>
+                    <div class="input-group">
+                        <label>FECHA:</label>
+                        <input type="date" id="fecha">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="tablaMediciones">
+                        <thead>
+                            <tr>
+                                <th>PARTIDA / CONCEPTO</th>
+                                <th style="width: 80px;">ANCHO</th>
+                                <th style="width: 20px;"></th>
+                                <th style="width: 80px;">ALTO</th>
+                                <th style="width: 90px;">TOTAL M²</th>
+                                <th style="width: 40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="filas-medicion">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="btn-add-simple" onclick="agregarFila()">+ Añadir Partida</button>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn-pdf" onclick="generarPDF()">
+                        💾 GENERAR INFORME PDF
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <footer class="help-msg">
+            <p>Pulsa (↑) y "Añadir a pantalla de inicio" para usar como App</p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>
+</html>
