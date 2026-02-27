@@ -70,13 +70,36 @@ select, input[type="number"] {
 
 .btn-delete:hover { background: var(--danger); color: white; }
 
-.actions { margin-top: 40px; }
+/* AJUSTES PARA EL BOTÓN PDF CENTRADO */
+.actions { 
+    margin-top: 40px; 
+    display: flex; 
+    justify-content: center; /* Centra el botón horizontalmente */
+}
+
 .btn-pdf {
-    width: 100%; background: var(--primary); color: white; padding: 20px; border: none;
-    border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: auto; /* Ya no ocupa el 100% */
+    min-width: 280px; /* Tamaño mínimo razonable */
+    background: var(--primary); 
+    color: white; 
+    padding: 15px 30px; 
+    border: none;
+    border-radius: 12px; 
+    font-size: 1rem; 
+    font-weight: bold; 
+    cursor: pointer; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s, background 0.2s;
+}
+
+.btn-pdf:active {
+    transform: scale(0.98);
+    background: var(--accent);
 }
 
 @media (max-width: 600px) {
     .empresa-header { flex-direction: column; text-align: center; }
     .contacto-section p { text-align: center; margin-top: 10px; }
+    .contacto-section img { margin: 0 auto 10px auto !important; }
+    .btn-pdf { width: 100%; } /* En móvil si es mejor que ocupe el ancho para facilitar el toque */
 }

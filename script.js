@@ -14,7 +14,7 @@ window.onload = () => {
 function agregarFila() {
     const tabla = document.getElementById('filas-medicion');
     const nuevaFila = tabla.insertRow();
-    
+
     let opcionesTipo = '<option value="">Tipo...</option>';
     for (let tipo in datosPartidas) {
         opcionesTipo += `<option value="${tipo}">${tipo}</option>`;
@@ -65,72 +65,133 @@ function calcularFila(input) {
     fila.querySelector('.total-fila').innerText = (ancho * alto).toFixed(2);
 }
 
-function generarPDF() {
+// Función auxiliar para cargar la imagen y devolver una Promesa
+function cargarImagen(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => resolve(img);
+        img.onerror = (e) => reject(e);
+    });
+}
+
+async function generarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const obra = document.getElementById('obra').value || "SIN NOMBRE";
-    const trabajador = document.getElementById('trabajador').value || "NO ESPECIFICADO";
-    const fecha = document.getElementById('fecha').value;
+    try {
+        // --- ESPERAR CARGA DEL LOGO ---
+        const logo = await cargarImagen('logo.png');
 
-    // --- CABECERA PROFESIONAL ---
-    doc.setFillColor(44, 62, 80);
-    doc.rect(0, 0, 210, 40, 'F');
-    doc.setFontSize(22);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont(undefined, 'bold');
-    doc.text("ROMERO MORATO", 14, 20);
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
-    doc.text("REVESTIMIENTOS Y SOLUCIONES ROMERO, S.L.U.", 14, 28);
-    doc.text("C/ CHAPARRAL Nº 2, PUERTO SERRANO (CÁDIZ) | 656 978 003", 14, 33);
+        const obra = document.getElementById('obra').value || "SIN NOMBRE";
+        const trabajador = document.getElementById('trabajador').value || "NO ESPECIFICADO";
+        const fecha = document.getElementById('fecha').value;
 
-    // --- DATOS PROYECTO ---
-    doc.setTextColor(40);
-    doc.setFontSize(11);
-    doc.text(`OBRA: ${obra.toUpperCase()}`, 14, 50);
-    doc.text(`TRABAJADOR: ${trabajador.toUpperCase()}`, 14, 57);
-    doc.text(`FECHA: ${fecha}`, 150, 50);
+        // --- CABECERA ---
+        doc.setDrawColor(0); 
+        doc.setLineWidth(0.6); // Línea de cabecera un poco más gruesa
+        doc.line(14, 40, 196, 40); 
 
-    const filasPDF = [];
-    let sumaTotal = 0;
-
-    document.querySelectorAll('#filas-medicion tr').forEach(fila => {
-        const t = fila.querySelector('.tipo-material').value;
-        const s = fila.querySelector('.subtipo-material').value;
-        const anc = parseFloat(fila.querySelector('.ancho').value) || 0;
-        const alt = parseFloat(fila.querySelector('.alto').value) || 0;
-        const tot = anc * alt;
+        doc.setTextColor(0);
+        doc.setFontSize(20);
+        doc.setFont(undefined, 'bold');
+        doc.text("ROMERO MORATO", 14, 20);
         
-        if (t && s) {
-            sumaTotal += tot;
-            filasPDF.push([`${t} - ${s}`, anc.toFixed(2), "x", alt.toFixed(2), `${tot.toFixed(2)} m²`]);
-        }
-    });
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.text("REVESTIMIENTOS Y SOLUCIONES ROMERO, S.L.U.", 14, 27);
+        doc.setTextColor(80); 
+        doc.text("C/ CHAPARRAL Nº 2, PUERTO SERRANO (CÁDIZ) | C.P.: 11659", 14, 32);
+        doc.text("C.I.F.: B-72378631 | TEL.: 656 978 003", 14, 36);
 
-    if (filasPDF.length === 0) {
-        alert("Por favor, rellena al menos una partida completa.");
-        return;
+        // --- LOGO ---
+        doc.addImage(logo, 'PNG', 150, 5, 45, 30);
+
+        // --- DATOS PROYECTO ---
+        doc.setTextColor(0);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text("DATOS DE LA MEDICIÓN", 14, 50);
+        
+        doc.setFont(undefined, 'normal');
+        doc.text(`OBRA:`, 14, 58);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${obra.toUpperCase()}`, 35, 58);
+        
+        doc.setFont(undefined, 'normal');
+        doc.text(`TRABAJADOR:`, 14, 64);
+        doc.text(`${trabajador.toUpperCase()}`, 45, 64);
+        
+        doc.text(`FECHA:`, 150, 58);
+        doc.text(`${fecha}`, 165, 58);
+
+        const filasPDF = [];
+        document.querySelectorAll('#filas-medicion tr').forEach(fila => {
+            const t = fila.querySelector('.tipo-material').value;
+            const s = fila.querySelector('.subtipo-material').value;
+            const anc = parseFloat(fila.querySelector('.ancho').value) || 0;
+            const alt = parseFloat(fila.querySelector('.alto').value) || 0;
+            const tot = anc * alt;
+
+            if (t && s) {
+                filasPDF.push([
+                    `${t.toUpperCase()} \n${s}`,
+                    anc.toFixed(2), 
+                    "x", 
+                    alt.toFixed(2), 
+                    `${tot.toFixed(2)} m²`
+                ]);
+            }
+        });
+
+        if (filasPDF.length === 0) {
+            alert("Por favor, rellena al menos una partida completa.");
+            return;
+        }
+
+        // --- TABLA CON BORDES MÁS VISIBLES ---
+        doc.autoTable({
+            startY: 75,
+            head: [['CONCEPTO / PARTIDA', 'ANCHO', '', 'ALTO', 'TOTAL']],
+            body: filasPDF,
+            theme: 'grid', 
+            headStyles: { 
+                fillColor: [255, 255, 255],
+                textColor: [0, 0, 0],
+                lineColor: [0, 0, 0], // Bordes de cabecera negros
+                lineWidth: 0.3,
+                fontStyle: 'bold',
+                halign: 'center'
+            },
+            styles: {
+                lineColor: [120, 120, 120], // Gris más oscuro para que se vea mejor
+                lineWidth: 0.2,            // Grosor de línea aumentado
+                textColor: [0, 0, 0],
+                fontSize: 9,
+                cellPadding: 3
+            },
+            columnStyles: {
+                0: { cellWidth: 80 },
+                1: { halign: 'center' },
+                2: { halign: 'center', textColor: [120, 120, 120] }, // 'x' en el mismo gris que los bordes
+                3: { halign: 'center' },
+                4: { halign: 'right', fontStyle: 'bold' }
+            },
+            margin: { top: 75 }
+        });
+
+        const pageCount = doc.internal.getNumberOfPages();
+        for(let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(120);
+            doc.text(`Página ${i} de ${pageCount}`, 196, 285, { align: 'right' });
+        }
+
+        doc.save(`Medicion_${obra}.pdf`);
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error al generar el PDF. Revisa el logo.");
     }
-
-    doc.autoTable({
-        startY: 65,
-        head: [['CONCEPTO / PARTIDA', 'ANCHO', '', 'ALTO', 'TOTAL']],
-        body: filasPDF,
-        theme: 'striped',
-        headStyles: { fillColor: [44, 62, 80], halign: 'center' },
-        columnStyles: { 
-            0: { cellWidth: 80 }, 
-            1: { halign: 'center' }, 
-            2: { halign: 'center', textColor: [150, 150, 150] }, 
-            3: { halign: 'center' }, 
-            4: { halign: 'right', fontStyle: 'bold' } 
-        }
-    });
-
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-
-    doc.save(`Medicion_${obra}.pdf`);
 }
