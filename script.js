@@ -90,7 +90,7 @@ function agregarFila() {
             <select class="subtipo-material" disabled style="margin-top:5px; font-size:0.85rem;" onchange="verificarManual(this)">
                 <option value="">Subtipo...</option>
             </select>
-            <input type="text" class="subtipo-manual" placeholder="Escriba el concepto..." style="display:none; margin-top:5px; width:100%; font-size:0.85rem; border: 1px solid #ff9f43;">
+            <input type="text" class="subtipo-manual" placeholder="✍️ Escriba el concepto aquí..." style="display:none; margin-top:5px; width:100%; font-size:0.85rem; border: 1px solid #ddd; padding: 10px; border-radius: 6px;">
         </td>
         <td style="text-align:center;"><input type="number" class="ancho" step="0.01" placeholder="0.00" oninput="calcularFila(this)" style="width:70px;"></td>
         

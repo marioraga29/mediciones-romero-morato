@@ -56,6 +56,19 @@ select, input[type="number"] {
     width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; background: #fff;
 }
 
+/* Estilo para que el campo manual sea idéntico a los selectores */
+.subtipo-manual {
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.subtipo-manual:focus {
+    border: 1px solid #e67e22 !important; /* Naranja Romero */
+    background-color: #fffdfb !important;
+    box-shadow: 0 0 5px rgba(230, 126, 34, 0.3);
+}
+
 .total-fila { font-weight: bold; color: var(--primary); font-size: 1rem; text-align: right; }
 
 .btn-add-simple {
@@ -69,6 +82,19 @@ select, input[type="number"] {
 }
 
 .btn-delete:hover { background: var(--danger); color: white; }
+
+/* NUEVA GUIA DE AYUDA */
+.guia-ayuda {
+    margin-top: 25px;
+    padding: 12px 15px;
+    background-color: #fff9f0;
+    border-left: 4px solid var(--orange);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #856404;
+}
+
+.guia-ayuda strong { color: var(--orange); }
 
 /* AJUSTES PARA EL BOTÓN PDF CENTRADO */
 .actions { 
