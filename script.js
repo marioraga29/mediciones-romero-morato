@@ -1,9 +1,70 @@
 const datosPartidas = {
-    "Pladur": ["12 mm", "15 mm", "Techo Continuo", "Trasdosado", "Tabiquería"],
-    "Yeso": ["Proyectado", "A buena vista", "Maestreado", "Guarnecido"],
-    "Perlita": ["Acabado Blanco", "Acabado Gris", "Fino"],
-    "Mortero": ["M-5 Graneado", "Hidrófugo", "Monocapa", "Enlucido"],
-    "Limpieza": ["General Obra", "Retirada Escombros"]
+    "Escayola": ["Tabica escayola dos caras","Tabica escayola tres caras",
+        "Tabica escayola una cara","Techo de escayola"
+    ],
+    "Mortero": [
+        "Mortero a dos capas","Mortero maestreado","Tabica mortero dos caras",
+        "Tabica mortero tres caras","Tabica mortero una cara","Techo mortero"
+    ],
+    "Perlita": [
+        "Perliyeso maestreado","Perliyeso semimaestreado","Tabica perliyeso dos caras",
+        "Tabica perliyeso tres caras","Tabica perliyeso una cara","Techo perliyeso"
+    ],
+    "Pladur": [
+        "Dif en placa hidrofuga en 13",
+        "Dif en placa hidrofuga en 15",
+        "Fosa de pladur de 5 x 5 hidrofuga",
+        "Fosas de pladur de 5 x 5",
+        "Lana mineral vidrio 50 mm",
+        "Refuerzo de rejilla + apertura + colocación",
+        "Refuerzo de rejilla + apertura + colocación + encintado",
+        "Refuerzo DM",
+        "Registro 20 x 20",
+        "Registro 40 x 40",
+        "Registro 60 x 60",
+        "Registro de 1,20 x 60",
+        "Tabica aquapanel cementosa",
+        "Tabica de placa glasroc",
+        "Tabica dos caras",
+        "Tabica tres caras",
+        "Tabica una cara",
+        "Tabique (13 + 48 + 13) MOD 400",
+        "Tabique (13 + 48 + 13) MOD 600",
+        "Tabique (13 + 70 + 13) MOD 400",
+        "Tabique (15 + 48 + 15) MOD 400",
+        "Tabique (15 + 48 + 15) MOD 600",
+        "Tabique (15 + 70 + 15) MOD 400",
+        "Tabique (15 + 70 + 15) MOD 600",
+        "Tabique (2 x 13 + 48 + 2 x 13) MOD 400",
+        "Tabique (2 x 13 + 48 + 2 x 13) MOD 600",
+        "Tabique (2 x 13 + 70 + 2 x 13) MOD 400",
+        "Tabique (2 x 13 + 70 + 2 x 13) MOD 600",
+        "Tabique (2 x 15 + 48 + 2 x 15) MOD 400",
+        "Tabique (2 x 15 + 48 + 2 x 15) MOD 600",
+        "Tabique (2 x 15 + 70 + 2 x 15) MOD 400",
+        "Tabique (2 x 15 + 70 + 2 x 15) MOD 600",
+        "Tapetas metros lineales",
+        "Techo aquapanel cementosa",
+        "Techo de placa glasroc",
+        "Techo desmontable placa de vinilo",
+        "Techo desmontable placa escayola lisa",
+        "Techo pladur en 13 mm",
+        "Techo pladur placa hidrófuga en 13 mm",
+        "Trasdosado (48 + 13) MOD 400",
+        "Trasdosado (48 + 13) MOD 600",
+        "Trasdosado (48 + 15) MOD 400",
+        "Trasdosado (48 + 15) MOD 600",
+        "Trasdosado (48 + 2 x 13) MOD 400",
+        "Trasdosado (48 + 2 x 13) MOD 600",
+        "Trasdosado (48 + 2 x 15) MOD 400",
+        "Trasdosado (48 + 2 x 15) MOD 600",
+        "Trasdosado (70 + 13) MOD 400",
+        "Trasdosado (70 + 13) MOD 600",
+        "Trasdosado (70 + 2 x 13) MOD 400",
+        "Trasdosado (70 + 2 x 13) MOD 600",
+        "Trasdosado con omega MOD 400 con placa de 15",
+        "Trasdosado con omega MOD 600 con placa de 15"
+    ]
 };
 
 let mostrarCostes = false;
@@ -26,7 +87,10 @@ function agregarFila() {
     nuevaFila.innerHTML = `
         <td>
             <select class="tipo-material" onchange="actualizarSubtipos(this)">${opcionesTipo}</select>
-            <select class="subtipo-material" disabled style="margin-top:5px; font-size:0.85rem;"><option value="">Subtipo...</option></select>
+            <select class="subtipo-material" disabled style="margin-top:5px; font-size:0.85rem;" onchange="verificarManual(this)">
+                <option value="">Subtipo...</option>
+            </select>
+            <input type="text" class="subtipo-manual" placeholder="Escriba el concepto..." style="display:none; margin-top:5px; width:100%; font-size:0.85rem; border: 1px solid #ff9f43;">
         </td>
         <td style="text-align:center;"><input type="number" class="ancho" step="0.01" placeholder="0.00" oninput="calcularFila(this)" style="width:70px;"></td>
         
@@ -41,6 +105,44 @@ function agregarFila() {
         <td class="col-costes importe-fila" style="display:${displayStyle}; text-align:right; font-weight:bold; padding-right:10px;">0.00</td>
         <td style="text-align:center;"><button type="button" class="btn-delete" onclick="eliminarFila(this)">x</button></td>
     `;
+}
+
+function actualizarSubtipos(selectTipo) {
+    const fila = selectTipo.closest('tr');
+    const selectSubtipo = fila.querySelector('.subtipo-material');
+    const inputManual = fila.querySelector('.subtipo-manual');
+    const tipo = selectTipo.value;
+
+    // Resetear campo manual al cambiar de tipo
+    inputManual.style.display = 'none';
+    inputManual.value = '';
+
+    if (tipo && datosPartidas[tipo]) {
+        selectSubtipo.disabled = false;
+        let html = '<option value="">Selecciona...</option>';
+        datosPartidas[tipo].forEach(s => html += `<option value="${s}">${s}</option>`);
+        
+        // AÑADIMOS OPCIÓN MANUAL
+        html += '<option value="MANUAL" style="color:orange; font-weight:bold;">+ OTRO (Escribir...)</option>';
+        
+        selectSubtipo.innerHTML = html;
+    } else {
+        selectSubtipo.disabled = true;
+        selectSubtipo.innerHTML = '<option value="">Subtipo...</option>';
+    }
+}
+
+// Nueva función para mostrar/ocultar el input manual
+function verificarManual(select) {
+    const fila = select.closest('tr');
+    const inputManual = fila.querySelector('.subtipo-manual');
+    if (select.value === "MANUAL") {
+        inputManual.style.display = 'block';
+        inputManual.focus();
+    } else {
+        inputManual.style.display = 'none';
+        inputManual.value = '';
+    }
 }
 
 function activarCostes() {
@@ -65,21 +167,6 @@ function eliminarFila(btn) {
         actualizarTotalGeneral();
     } else {
         alert("Debe haber al menos una partida en la medición.");
-    }
-}
-
-function actualizarSubtipos(selectTipo) {
-    const fila = selectTipo.closest('tr');
-    const selectSubtipo = fila.querySelector('.subtipo-material');
-    const tipo = selectTipo.value;
-    if (tipo && datosPartidas[tipo]) {
-        selectSubtipo.disabled = false;
-        let html = '<option value="">Selecciona...</option>';
-        datosPartidas[tipo].forEach(s => html += `<option value="${s}">${s}</option>`);
-        selectSubtipo.innerHTML = html;
-    } else {
-        selectSubtipo.disabled = true;
-        selectSubtipo.innerHTML = '<option value="">Subtipo...</option>';
     }
 }
 
@@ -130,7 +217,6 @@ async function generarPDF() {
         const fecha = document.getElementById('fecha').value;
         const notas = document.getElementById('notas').value;
 
-        // --- CABECERA (ROMERO MORATO) ---
         doc.setDrawColor(0); 
         doc.setLineWidth(0.6);
         doc.line(14, 40, 196, 40); 
@@ -149,7 +235,6 @@ async function generarPDF() {
 
         doc.addImage(logo, 'PNG', 150, 5, 45, 30);
 
-        // --- DATOS PROYECTO ---
         doc.setTextColor(0);
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
@@ -165,18 +250,27 @@ async function generarPDF() {
         doc.text(`TRABAJADOR: ${trabajador.toUpperCase()}`, 14, 66);
         doc.text(`FECHA: ${fecha}`, 150, 54);
 
-        const filasPDF = [];
+        const partidasPorTipo = {};
         let totalGeneralDinero = 0;
 
         document.querySelectorAll('#filas-medicion tr').forEach(fila => {
             const t = fila.querySelector('.tipo-material').value;
-            const s = fila.querySelector('.subtipo-material').value;
+            const selectS = fila.querySelector('.subtipo-material');
+            const manualS = fila.querySelector('.subtipo-manual').value;
+            
+            // LÓGICA: Si el select es "MANUAL", usamos el texto escrito. Si no, el valor del select.
+            let s = (selectS.value === "MANUAL") ? manualS : selectS.value;
+
             const anc = parseFloat(fila.querySelector('.ancho').value) || 0;
             const alt = parseFloat(fila.querySelector('.alto').value) || 0;
             const totM2 = anc * alt;
 
             if (t && s) {
-                let filaDatos = [`${t.toUpperCase()} \n${s}`, anc.toFixed(2), "x", alt.toFixed(2), `${totM2.toFixed(2)} m²`];
+                if (!partidasPorTipo[t]) {
+                    partidasPorTipo[t] = [];
+                }
+                
+                let filaDatos = [s, anc.toFixed(2), "x", alt.toFixed(2), `${totM2.toFixed(2)} m²`];
                 
                 if (mostrarCostes) {
                     const pUnit = parseFloat(fila.querySelector('.precio-unitario').value) || 0;
@@ -184,16 +278,29 @@ async function generarPDF() {
                     totalGeneralDinero += subtotal;
                     filaDatos.push(`${pUnit.toFixed(2)} €`, `${subtotal.toFixed(2)} €`);
                 }
-                filasPDF.push(filaDatos);
+                partidasPorTipo[t].push(filaDatos);
             }
         });
 
-        if (filasPDF.length === 0) {
+        const filasFinalesPDF = [];
+        for (const tipo in partidasPorTipo) {
+            const numColumnas = mostrarCostes ? 7 : 5;
+            const filaTipo = [];
+            for (let i = 0; i < numColumnas; i++) {
+                filaTipo.push({
+                    content: (i === 0) ? tipo.toUpperCase() : "", 
+                    styles: { fillColor: [245, 245, 245], fontStyle: 'bold', textColor: [0, 0, 0], halign: 'left' }
+                });
+            }
+            filasFinalesPDF.push(filaTipo);
+            partidasPorTipo[tipo].forEach(partida => { filasFinalesPDF.push(partida); });
+        }
+
+        if (filasFinalesPDF.length === 0) {
             alert("Por favor, rellena al menos una partida completa.");
             return;
         }
 
-        // Configuración dinámica de columnas
         let encabezados = [['CONCEPTO / PARTIDA', 'ANCHO', '', 'ALTO', 'TOTAL']];
         let estilosColumnas = {
             0: { cellWidth: mostrarCostes ? 60 : 80 },
@@ -212,7 +319,7 @@ async function generarPDF() {
         doc.autoTable({
             startY: 72,
             head: encabezados,
-            body: filasPDF,
+            body: filasFinalesPDF,
             theme: 'grid', 
             headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.3, fontStyle: 'bold', halign: 'center' },
             styles: { lineColor: [120, 120, 120], lineWidth: 0.2, textColor: [0, 0, 0], fontSize: 9, cellPadding: 3 },
@@ -222,7 +329,6 @@ async function generarPDF() {
 
         let finalY = doc.lastAutoTable.finalY;
 
-        // --- TOTAL DINERO EN PDF ---
         if (mostrarCostes) {
             doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
@@ -230,7 +336,6 @@ async function generarPDF() {
             finalY += 15;
         }
 
-        // --- OBSERVACIONES ---
         if (notas.trim() !== "") {
             const posNotas = finalY + 10;
             doc.setFontSize(10);
