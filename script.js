@@ -11,59 +11,25 @@ const datosPartidas = {
         "Tabica perliyeso tres caras","Tabica perliyeso una cara","Techo perliyeso"
     ],
     "Pladur": [
-        "Dif en placa hidrofuga en 13",
-        "Dif en placa hidrofuga en 15",
-        "Fosa de pladur de 5 x 5 hidrofuga",
-        "Fosas de pladur de 5 x 5",
-        "Lana mineral vidrio 50 mm",
-        "Refuerzo de rejilla + apertura + colocación",
-        "Refuerzo de rejilla + apertura + colocación + encintado",
-        "Refuerzo DM",
-        "Registro 20 x 20",
-        "Registro 40 x 40",
-        "Registro 60 x 60",
-        "Registro de 1,20 x 60",
-        "Tabica aquapanel cementosa",
-        "Tabica de placa glasroc",
-        "Tabica dos caras",
-        "Tabica tres caras",
-        "Tabica una cara",
-        "Tabique (13 + 48 + 13) MOD 400",
-        "Tabique (13 + 48 + 13) MOD 600",
-        "Tabique (13 + 70 + 13) MOD 400",
-        "Tabique (15 + 48 + 15) MOD 400",
-        "Tabique (15 + 48 + 15) MOD 600",
-        "Tabique (15 + 70 + 15) MOD 400",
-        "Tabique (15 + 70 + 15) MOD 600",
-        "Tabique (2 x 13 + 48 + 2 x 13) MOD 400",
-        "Tabique (2 x 13 + 48 + 2 x 13) MOD 600",
-        "Tabique (2 x 13 + 70 + 2 x 13) MOD 400",
-        "Tabique (2 x 13 + 70 + 2 x 13) MOD 600",
-        "Tabique (2 x 15 + 48 + 2 x 15) MOD 400",
-        "Tabique (2 x 15 + 48 + 2 x 15) MOD 600",
-        "Tabique (2 x 15 + 70 + 2 x 15) MOD 400",
-        "Tabique (2 x 15 + 70 + 2 x 15) MOD 600",
-        "Tapetas metros lineales",
-        "Techo aquapanel cementosa",
-        "Techo de placa glasroc",
-        "Techo desmontable placa de vinilo",
-        "Techo desmontable placa escayola lisa",
-        "Techo pladur en 13 mm",
-        "Techo pladur placa hidrófuga en 13 mm",
-        "Trasdosado (48 + 13) MOD 400",
-        "Trasdosado (48 + 13) MOD 600",
-        "Trasdosado (48 + 15) MOD 400",
-        "Trasdosado (48 + 15) MOD 600",
-        "Trasdosado (48 + 2 x 13) MOD 400",
-        "Trasdosado (48 + 2 x 13) MOD 600",
-        "Trasdosado (48 + 2 x 15) MOD 400",
-        "Trasdosado (48 + 2 x 15) MOD 600",
-        "Trasdosado (70 + 13) MOD 400",
-        "Trasdosado (70 + 13) MOD 600",
-        "Trasdosado (70 + 2 x 13) MOD 400",
-        "Trasdosado (70 + 2 x 13) MOD 600",
-        "Trasdosado con omega MOD 400 con placa de 15",
-        "Trasdosado con omega MOD 600 con placa de 15"
+        "Dif en placa hidrofuga en 13","Dif en placa hidrofuga en 15","Fosa de pladur de 5 x 5 hidrofuga",
+        "Fosas de pladur de 5 x 5","Lana mineral vidrio 50 mm","Refuerzo de rejilla + apertura + colocación",
+        "Refuerzo de rejilla + apertura + colocación + encintado","Refuerzo DM","Registro 20 x 20","Registro 40 x 40",
+        "Registro 60 x 60","Registro de 1,20 x 60","Tabica aquapanel cementosa","Tabica de placa glasroc",
+        "Tabica dos caras","Tabica tres caras","Tabica una cara","Tabique (13 + 48 + 13) MOD 400",
+        "Tabique (13 + 48 + 13) MOD 600","Tabique (13 + 70 + 13) MOD 400","Tabique (15 + 48 + 15) MOD 400",
+        "Tabique (15 + 48 + 15) MOD 600","Tabique (15 + 70 + 15) MOD 400","Tabique (15 + 70 + 15) MOD 600",
+        "Tabique (2 x 13 + 48 + 2 x 13) MOD 400","Tabique (2 x 13 + 48 + 2 x 13) MOD 600",
+        "Tabique (2 x 13 + 70 + 2 x 13) MOD 400","Tabique (2 x 13 + 70 + 2 x 13) MOD 600",
+        "Tabique (2 x 15 + 48 + 2 x 15) MOD 400","Tabique (2 x 15 + 48 + 2 x 15) MOD 600",
+        "Tabique (2 x 15 + 70 + 2 x 15) MOD 400","Tabique (2 x 15 + 70 + 2 x 15) MOD 600",
+        "Tapetas metros lineales","Techo aquapanel cementosa","Techo de placa glasroc",
+        "Techo desmontable placa de vinilo","Techo desmontable placa escayola lisa",
+        "Techo pladur en 13 mm","Techo pladur placa hidrófuga en 13 mm","Trasdosado (48 + 13) MOD 400",
+        "Trasdosado (48 + 13) MOD 600","Trasdosado (48 + 15) MOD 400","Trasdosado (48 + 15) MOD 600",
+        "Trasdosado (48 + 2 x 13) MOD 400","Trasdosado (48 + 2 x 13) MOD 600","Trasdosado (48 + 2 x 15) MOD 400",
+        "Trasdosado (48 + 2 x 15) MOD 600","Trasdosado (70 + 13) MOD 400","Trasdosado (70 + 13) MOD 600",
+        "Trasdosado (70 + 2 x 13) MOD 400","Trasdosado (70 + 2 x 13) MOD 600",
+        "Trasdosado con omega MOD 400 con placa de 15","Trasdosado con omega MOD 600 con placa de 15"
     ]
 };
 
@@ -122,7 +88,7 @@ function actualizarSubtipos(selectTipo) {
         let html = '<option value="">Selecciona...</option>';
         datosPartidas[tipo].forEach(s => html += `<option value="${s}">${s}</option>`);
         
-        // AÑADIMOS OPCIÓN MANUAL
+        // Aádir opción manual al final de la lista
         html += '<option value="MANUAL" style="color:orange; font-weight:bold;">+ OTRO (Escribir...)</option>';
         
         selectSubtipo.innerHTML = html;
@@ -132,7 +98,7 @@ function actualizarSubtipos(selectTipo) {
     }
 }
 
-// Nueva función para mostrar/ocultar el input manual
+// Función para mostrar/ocultar el input manual
 function verificarManual(select) {
     const fila = select.closest('tr');
     const inputManual = fila.querySelector('.subtipo-manual');
@@ -258,7 +224,7 @@ async function generarPDF() {
             const selectS = fila.querySelector('.subtipo-material');
             const manualS = fila.querySelector('.subtipo-manual').value;
             
-            // LÓGICA: Si el select es "MANUAL", usamos el texto escrito. Si no, el valor del select.
+            //Si el select es "MANUAL", usamos el texto escrito. Si no, el valor del select.
             let s = (selectS.value === "MANUAL") ? manualS : selectS.value;
 
             const anc = parseFloat(fila.querySelector('.ancho').value) || 0;
@@ -269,7 +235,6 @@ async function generarPDF() {
                 if (!partidasPorTipo[t]) {
                     partidasPorTipo[t] = [];
                 }
-                
                 let filaDatos = [s, anc.toFixed(2), "x", alt.toFixed(2), `${totM2.toFixed(2)} m²`];
                 
                 if (mostrarCostes) {
