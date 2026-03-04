@@ -58,11 +58,11 @@ function agregarFila() {
             </select>
             <input type="text" class="subtipo-manual" placeholder="✍️ Escriba el concepto aquí..." style="display:none; margin-top:5px; width:100%; font-size:0.85rem; border: 1px solid #ddd; padding: 10px; border-radius: 6px;">
         </td>
-        <td style="text-align:center;"><input type="number" class="ancho" step="0.01" placeholder="0.00" oninput="calcularFila(this)" style="width:70px;"></td>
-        
-        <td style="text-align:center; font-weight:bold; color:#ccc; width: 30px; min-width: 30px;">x</td>
-        
-        <td style="text-align:center;"><input type="number" class="alto" step="0.01" placeholder="0.00" oninput="calcularFila(this)" style="width:70px;"></td>
+        <td style="text-align:center;"><input type="number" class="ancho" step="0.01" placeholder="0.00" oninput="calcularFila(this)" style="width:65px;"></td>
+        <td style="text-align:center; font-weight:bold; color:#ccc;">x</td>
+        <td style="text-align:center;"><input type="number" class="alto" step="0.01" placeholder="0.00" oninput="calcularFila(this)" style="width:65px;"></td>
+        <td style="text-align:center; font-weight:bold; color:#ccc;">x</td>
+        <td style="text-align:center;"><input type="number" class="largo" step="0.01" value="1.00" oninput="calcularFila(this)" style="width:65px;"></td>
         
         <td class="total-fila" style="text-align:right; font-weight:bold; padding-right:10px;">0.00</td>
         <td class="col-costes" style="display:${displayStyle}; text-align:right;">
@@ -79,7 +79,6 @@ function actualizarSubtipos(selectTipo) {
     const inputManual = fila.querySelector('.subtipo-manual');
     const tipo = selectTipo.value;
 
-    // Resetear campo manual al cambiar de tipo
     inputManual.style.display = 'none';
     inputManual.value = '';
 
@@ -87,10 +86,7 @@ function actualizarSubtipos(selectTipo) {
         selectSubtipo.disabled = false;
         let html = '<option value="">Selecciona...</option>';
         datosPartidas[tipo].forEach(s => html += `<option value="${s}">${s}</option>`);
-        
-        // Aádir opción manual al final de la lista
         html += '<option value="MANUAL" style="color:orange; font-weight:bold;">+ OTRO (Escribir...)</option>';
-        
         selectSubtipo.innerHTML = html;
     } else {
         selectSubtipo.disabled = true;
@@ -98,7 +94,6 @@ function actualizarSubtipos(selectTipo) {
     }
 }
 
-// Función para mostrar/ocultar el input manual
 function verificarManual(select) {
     const fila = select.closest('tr');
     const inputManual = fila.querySelector('.subtipo-manual');
@@ -140,7 +135,9 @@ function calcularFila(input) {
     const fila = input.closest('tr');
     const ancho = parseFloat(fila.querySelector('.ancho').value) || 0;
     const alto = parseFloat(fila.querySelector('.alto').value) || 0;
-    const totalM2 = ancho * alto;
+    const largo = parseFloat(fila.querySelector('.largo').value) || 0;
+    
+    const totalM2 = ancho * alto * largo;
     fila.querySelector('.total-fila').innerText = totalM2.toFixed(2);
 
     if (mostrarCostes) {
@@ -180,7 +177,10 @@ async function generarPDF() {
         const numDoc = document.getElementById('numDocumento').value || "---";
         const obra = document.getElementById('obra').value || "SIN NOMBRE";
         const trabajador = document.getElementById('trabajador').value || "NO ESPECIFICADO";
-        const fecha = document.getElementById('fecha').value;
+        
+        const fechaRaw = document.getElementById('fecha').value;
+        const fecha = fechaRaw.split('-').reverse().join('/'); 
+        
         const notas = document.getElementById('notas').value;
 
         doc.setDrawColor(0); 
@@ -224,18 +224,18 @@ async function generarPDF() {
             const selectS = fila.querySelector('.subtipo-material');
             const manualS = fila.querySelector('.subtipo-manual').value;
             
-            //Si el select es "MANUAL", usamos el texto escrito. Si no, el valor del select.
             let s = (selectS.value === "MANUAL") ? manualS : selectS.value;
 
             const anc = parseFloat(fila.querySelector('.ancho').value) || 0;
             const alt = parseFloat(fila.querySelector('.alto').value) || 0;
-            const totM2 = anc * alt;
+            const lar = parseFloat(fila.querySelector('.largo').value) || 1;
+            const totM2 = anc * alt * lar;
 
             if (t && s) {
                 if (!partidasPorTipo[t]) {
                     partidasPorTipo[t] = [];
                 }
-                let filaDatos = [s, anc.toFixed(2), "x", alt.toFixed(2), `${totM2.toFixed(2)} m²`];
+                let filaDatos = [s, anc.toFixed(2), alt.toFixed(2), lar.toFixed(2), `${totM2.toFixed(2)} m²`];
                 
                 if (mostrarCostes) {
                     const pUnit = parseFloat(fila.querySelector('.precio-unitario').value) || 0;
@@ -266,11 +266,11 @@ async function generarPDF() {
             return;
         }
 
-        let encabezados = [['CONCEPTO / PARTIDA', 'ANCHO', '', 'ALTO', 'TOTAL']];
+        let encabezados = [['CONCEPTO / PARTIDA', 'ANCHO', 'ALTO', 'LARGO', 'TOTAL']];
         let estilosColumnas = {
             0: { cellWidth: mostrarCostes ? 60 : 80 },
             1: { halign: 'center' },
-            2: { halign: 'center', textColor: [120, 120, 120] },
+            2: { halign: 'center' },
             3: { halign: 'center' },
             4: { halign: 'right', fontStyle: 'bold' }
         };
