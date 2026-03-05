@@ -249,7 +249,10 @@ async function generarPDF() {
 
         const filasFinalesPDF = [];
         for (const tipo in partidasPorTipo) {
+            let totalM2Tipo = 0; // Calculamos el total de m2 de este bloque
             const numColumnas = mostrarCostes ? 7 : 5;
+            
+            // Fila de Encabezado de Tipo
             const filaTipo = [];
             for (let i = 0; i < numColumnas; i++) {
                 filaTipo.push({
@@ -258,7 +261,29 @@ async function generarPDF() {
                 });
             }
             filasFinalesPDF.push(filaTipo);
-            partidasPorTipo[tipo].forEach(partida => { filasFinalesPDF.push(partida); });
+
+            // Añadir partidas y sumar m2
+            partidasPorTipo[tipo].forEach(partida => { 
+                filasFinalesPDF.push(partida); 
+                const m2Valor = parseFloat(partida[4].split(' ')[0]) || 0;
+                totalM2Tipo += m2Valor;
+            });
+
+            // Fila de Subtotal del Tipo (NUEVA)
+            const filaSubtotal = [];
+            for (let i = 0; i < numColumnas; i++) {
+                filaSubtotal.push({
+                    content: (i === 0) ? `TOTAL ${tipo.toUpperCase()}:` : (i === 4) ? `${totalM2Tipo.toFixed(2)} m²` : "",
+                    styles: { 
+                        fillColor: [255, 255, 255], 
+                        fontStyle: 'bold', 
+                        textColor: [0, 0, 0], 
+                        halign: (i === 4) ? 'right' : 'left',
+                        fontSize: 9
+                    }
+                });
+            }
+            filasFinalesPDF.push(filaSubtotal);
         }
 
         if (filasFinalesPDF.length === 0) {
