@@ -30,6 +30,9 @@ const datosPartidas = {
         "Trasdosado (48 + 2 x 15) MOD 600","Trasdosado (70 + 13) MOD 400","Trasdosado (70 + 13) MOD 600",
         "Trasdosado (70 + 2 x 13) MOD 400","Trasdosado (70 + 2 x 13) MOD 600",
         "Trasdosado con omega MOD 400 con placa de 15","Trasdosado con omega MOD 600 con placa de 15"
+    ],
+    "Puente de unión": [
+        "Puente de unión"
     ]
 };
 
