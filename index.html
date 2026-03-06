@@ -100,15 +100,27 @@
                     <button type="button" class="btn-pdf" onclick="generarPDF()">
                         💾 GENERAR INFORME PDF
                     </button>
+                    <button type="button" id="btnGuardar" class="btn-pdf" onclick="guardarEnNube()" style="background:#3498db;">
+                        ☁️ GUARDAR EN NUBE
+                    </button>
+                    <button type="button" id="btnCargar" class="btn-pdf" onclick="cargarObraPorNombre()" style="background:#9b59b6;">
+                        📂 BUSCAR Y CARGAR
+                    </button>
                 </div>
 
                 <div class="guia-ayuda">
     💡              <strong>Nota:</strong> Si no encuentras una partida en la lista, desliza hasta el final del desplegable y selecciona <strong>"+ ESCRIBIR OTRO..."</strong> para escribirla manualmente.
                 </div>
+                <div class="guia-ayuda-nube">
+                    <strong>☁️ GESTIÓN EN LA NUBE:</strong> 
+                    Para guardar, asegúrate de escribir el nombre de la obra y pulsa <strong>GUARDAR EN LA NUBE</strong>. Para recuperar una medición anterior, pulsa <strong>BUSCAR Y CARGAR</strong> e introduce el nombre exacto de la obra. 
+                    <i>(Se recuperarán automáticamente todas las medidas, notas y precios).</i>
+                </div>
             </form>
         </section>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="script.js"></script>

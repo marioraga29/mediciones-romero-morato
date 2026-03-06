@@ -1,3 +1,8 @@
+// --- CONFIGURACIÓN SUPABASE ---
+const supabaseUrl = 'https://dfcjsnfjetypsnvvbbeg.supabase.co';
+const supabaseKey = 'sb_publishable_AiDH1cvaTp2XZy0Bb7aQ-g_XGH-hUph';
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
 const datosPartidas = {
     "Escayola": ["Tabica escayola dos caras","Tabica escayola tres caras",
         "Tabica escayola una cara","Techo de escayola"
@@ -354,4 +359,139 @@ async function generarPDF() {
         console.error("Error:", error);
         alert("Error al generar el PDF.");
     }
+}
+
+// --- FUNCIÓN PARA GUARDAR EL FORMULARIO ---
+async function guardarEnNube() {
+    const nombreObra = document.getElementById('obra').value.trim();
+    
+    if (!nombreObra) {
+        alert("⚠️ Por favor, escribe un nombre en el campo 'OBRA' para poder guardar.");
+        return;
+    }
+
+    const btn = document.getElementById('btnGuardar');
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML = "⏳ GUARDANDO...";
+    btn.disabled = true;
+
+    // Capturamos todo el estado actual del formulario
+    const estadoFormulario = {
+        numDocumento: document.getElementById('numDocumento').value,
+        obra: nombreObra,
+        trabajador: document.getElementById('trabajador').value,
+        fecha: document.getElementById('fecha').value,
+        notas: document.getElementById('notas').value,
+        mostrarCostes: mostrarCostes, // Variable global de tu código
+        filas: []
+    };
+
+    // Recorremos las filas de la tabla para guardar cada partida
+    document.querySelectorAll('#filas-medicion tr').forEach(fila => {
+        estadoFormulario.filas.push({
+            tipo: fila.querySelector('.tipo-material').value,
+            subtipo: fila.querySelector('.subtipo-material').value,
+            subtipoManual: fila.querySelector('.subtipo-manual').value,
+            ancho: fila.querySelector('.ancho').value,
+            alto: fila.querySelector('.alto').value,
+            largo: fila.querySelector('.largo').value,
+            precio: fila.querySelector('.precio-unitario') ? fila.querySelector('.precio-unitario').value : ""
+        });
+    });
+
+    // Enviamos a la tabla 'lista-partidas' de Supabase
+    const { data, error } = await _supabase
+        .from('lista-partidas')
+        .insert([{ 
+            nombre_obra: nombreObra, 
+            datos: estadoFormulario 
+        }]);
+
+    if (error) {
+        alert("❌ Error al guardar: " + error.message);
+    } else {
+        alert("✅ Obra '" + nombreObra + "' guardada correctamente.");
+    }
+    
+    btn.innerHTML = textoOriginal;
+    btn.disabled = false;
+}
+
+// --- FUNCIÓN PARA BUSCAR Y CARGAR POR NOMBRE ---
+async function cargarObraPorNombre() {
+    // 1. Pedimos el nombre de la obra con una ventana emergente
+    const nombreABuscar = prompt("🔍 Introduce el NOMBRE DE LA OBRA que deseas cargar:");
+
+    // Si el usuario cancela o deja vacío, no hacemos nada
+    if (nombreABuscar === null || nombreABuscar.trim() === "") {
+        return; 
+    }
+
+    const btn = document.getElementById('btnCargar');
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML = "⏳ BUSCANDO...";
+    btn.disabled = true;
+
+    // 2. Buscamos en Supabase (asegúrate que el nombre de tabla sea lista-partidas)
+    const { data, error } = await _supabase
+        .from('lista-partidas') 
+        .select('*')
+        .eq('nombre_obra', nombreABuscar.trim()) 
+        .order('created_at', { ascending: false }) 
+        .limit(1);
+
+    if (error) {
+        alert("❌ Error en la base de datos: " + error.message);
+    } else if (!data || data.length === 0) {
+        alert("❓ No se encontró la obra: '" + nombreABuscar + "'\n\nRevisa si el nombre es correcto.");
+    } else {
+        // 3. Si existe, cargamos los datos
+        const guardado = data[0].datos;
+        
+        // Limpiamos la tabla para que no se mezclen datos antiguos
+        document.getElementById('filas-medicion').innerHTML = "";
+
+        // Rellenamos la cabecera (incluyendo el nombre de la obra que acabamos de traer)
+        document.getElementById('obra').value = guardado.obra || nombreABuscar;
+        document.getElementById('numDocumento').value = guardado.numDocumento || "";
+        document.getElementById('trabajador').value = guardado.trabajador || "";
+        document.getElementById('fecha').value = guardado.fecha || "";
+        document.getElementById('notas').value = guardado.notas || "";
+
+        // Ajustamos la vista de costes según se guardó
+        if (guardado.mostrarCostes !== mostrarCostes) {
+            activarCostes();
+        }
+
+        // Reconstruimos todas las filas
+        guardado.filas.forEach(f => {
+            agregarFila();
+            const filas = document.querySelectorAll('#filas-medicion tr');
+            const ultimaFila = filas[filas.length - 1];
+
+            ultimaFila.querySelector('.tipo-material').value = f.tipo;
+            actualizarSubtipos(ultimaFila.querySelector('.tipo-material'));
+            ultimaFila.querySelector('.subtipo-material').value = f.subtipo;
+            
+            if (f.subtipo === "MANUAL") {
+                const manual = ultimaFila.querySelector('.subtipo-manual');
+                manual.style.display = 'block';
+                manual.value = f.subtipoManual;
+            }
+
+            ultimaFila.querySelector('.ancho').value = f.ancho;
+            ultimaFila.querySelector('.alto').value = f.alto;
+            ultimaFila.querySelector('.largo').value = f.largo;
+            
+            const pUnit = ultimaFila.querySelector('.precio-unitario');
+            if (pUnit) pUnit.value = f.precio;
+            
+            calcularFila(ultimaFila.querySelector('.ancho'));
+        });
+
+        alert("✅ Obra '" + nombreABuscar + "' cargada con éxito.");
+    }
+
+    btn.innerHTML = textoOriginal;
+    btn.disabled = false;
 }

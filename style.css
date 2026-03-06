@@ -3,6 +3,7 @@
     --accent: #34495e;
     --danger: #e74c3c;
     --bg: #f4f7f6;
+    --orange: #e67e22;
 }
 
 body {
@@ -56,7 +57,6 @@ select, input[type="number"] {
     width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; background: #fff;
 }
 
-/* Estilo para que el campo manual sea idéntico a los selectores */
 .subtipo-manual {
     box-sizing: border-box;
     outline: none;
@@ -64,7 +64,7 @@ select, input[type="number"] {
 }
 
 .subtipo-manual:focus {
-    border: 1px solid #e67e22 !important; /* Naranja Romero */
+    border: 1px solid #e67e22 !important; 
     background-color: #fffdfb !important;
     box-shadow: 0 0 5px rgba(230, 126, 34, 0.3);
 }
@@ -83,7 +83,6 @@ select, input[type="number"] {
 
 .btn-delete:hover { background: var(--danger); color: white; }
 
-/* NUEVA GUIA DE AYUDA */
 .guia-ayuda {
     margin-top: 25px;
     padding: 12px 15px;
@@ -96,36 +95,63 @@ select, input[type="number"] {
 
 .guia-ayuda strong { color: var(--orange); }
 
-/* AJUSTES PARA EL BOTÓN PDF CENTRADO */
+.guia-ayuda-nube {
+    margin-top: 10px; /* Un poco de separación con la nota de arriba */
+    padding: 12px 15px;
+    background-color: #f0f7ff; /* Azul muy clarito */
+    border-left: 4px solid #3498db; /* Borde azul nube */
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+.guia-ayuda-nube strong { 
+    color: #3498db; 
+}
+
+/* --- SECCIÓN MODIFICADA PARA 4 BOTONES --- */
 .actions { 
     margin-top: 40px; 
     display: flex; 
-    justify-content: center; /* Centra el botón horizontalmente */
+    justify-content: center; 
+    gap: 8px;
+    flex-wrap: nowrap; /* Mantiene los botones en una línea en PC */
 }
 
 .btn-pdf {
-    width: auto; /* Ya no ocupa el 100% */
-    min-width: 280px; /* Tamaño mínimo razonable */
+    flex: 1;
+    min-width: 120px;
+    max-width: 210px;
     background: var(--primary); 
     color: white; 
-    padding: 15px 30px; 
+    padding: 12px 5px; 
     border: none;
-    border-radius: 12px; 
-    font-size: 1rem; 
+    border-radius: 8px; 
+    font-size: 0.75rem; /* Ajustado para que quepan textos largos */
     font-weight: bold; 
     cursor: pointer; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     transition: transform 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
 }
 
 .btn-pdf:active {
-    transform: scale(0.98);
+    transform: scale(0.96);
     background: var(--accent);
+}
+
+@media (max-width: 850px) {
+    .actions { flex-wrap: wrap; }
+    .btn-pdf { flex: 45%; max-width: none; font-size: 0.85rem; }
 }
 
 @media (max-width: 600px) {
     .empresa-header { flex-direction: column; text-align: center; }
     .contacto-section p { text-align: center; margin-top: 10px; }
-    .contacto-section img { margin: 0 auto 10px auto !important; }
-    .btn-pdf { width: 100%; } /* En móvil si es mejor que ocupe el ancho para facilitar el toque */
+    .btn-pdf { flex: 100%; } 
 }
