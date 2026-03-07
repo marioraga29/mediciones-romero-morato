@@ -38,7 +38,8 @@ const datosPartidas = {
     ],
     "Puente de unión": [
         "Puente de unión"
-    ]
+    ],
+    "Otro": []
 };
 
 let mostrarCostes = false;
