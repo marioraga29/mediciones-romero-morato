@@ -224,7 +224,6 @@ async function generarPDF() {
         doc.text(`TRABAJADOR: ${trabajador.toUpperCase()}`, 14, 66);
         doc.text(`FECHA: ${fecha}`, 150, 54);
 
-        // Procesamiento de partidas
         const partidasPorTipo = {};
         let totalGeneralDinero = 0;
 
@@ -311,7 +310,7 @@ async function generarPDF() {
             headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.3, fontStyle: 'bold', halign: 'center' },
             styles: { lineColor: [120, 120, 120], lineWidth: 0.2, textColor: [0, 0, 0], fontSize: 9, cellPadding: 3 },
             columnStyles: estilosColumnas,
-            margin: { top: 72 }
+            margin: { top: 72, bottom: 60 } // Margen inferior para no tapar las firmas fijas
         });
 
         let finalY = doc.lastAutoTable.finalY;
@@ -323,29 +322,44 @@ async function generarPDF() {
             finalY += 15;
         }
 
-        // --- SECCIÓN DE NOTAS MEJORADA CON SALTO DE PÁGINA ---
+        // --- NOTAS (Se ajustan si hay poco espacio) ---
+        const pageHeight = doc.internal.pageSize.height;
         if (notas.trim() !== "") {
-            const pageHeight = doc.internal.pageSize.height;
             let posNotas = finalY + 15;
-            
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'bold');
-            
             const splitNotas = doc.splitTextToSize(notas, 180);
             const alturaNotas = (splitNotas.length * 5) + 10;
 
-            // Si no cabe (margen inferior de 25mm), saltar página
-            if (posNotas + alturaNotas > pageHeight - 25) {
+            // Si las notas van a pisar el área de firmas fijas (menos de 60mm del final)
+            if (posNotas + alturaNotas > pageHeight - 60) {
                 doc.addPage();
                 posNotas = 25;
             }
-
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
             doc.text("OBSERVACIONES:", 14, posNotas);
             doc.setFont(undefined, 'normal');
             doc.setFontSize(9);
             doc.text(splitNotas, 14, posNotas + 7);
         }
 
+        // --- FIRMAS FIJAS AL FINAL (PIE DE PÁGINA ÚLTIMA HOJA) ---
+        // Ponemos las firmas siempre a la misma altura desde el borde inferior
+        const yFirma = pageHeight - 40; 
+
+        doc.setPage(doc.internal.getNumberOfPages()); // Asegurar que pintamos en la última página creada
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(0);
+
+        // Firma Contrata (Izquierda)
+        doc.line(20, yFirma, 85, yFirma); 
+        doc.text("CONTRATA", 52.5, yFirma + 7, { align: 'center' });
+
+        // Firma Subcontrata (Derecha)
+        doc.line(125, yFirma, 190, yFirma); 
+        doc.text("SUBCONTRATA", 157.5, yFirma + 7, { align: 'center' });
+
+        // Numeración de páginas
         const pageCount = doc.internal.getNumberOfPages();
         for(let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
@@ -362,7 +376,7 @@ async function generarPDF() {
     }
 }
 
-// --- FUNCIÓN PARA GUARDAR EL FORMULARIO ---
+// --- RESTO DE FUNCIONES (Guardar y Cargar) SE MANTIENEN IGUAL ---
 async function guardarEnNube() {
     const nombreObra = document.getElementById('obra').value.trim();
     if (!nombreObra) {
@@ -411,7 +425,6 @@ async function guardarEnNube() {
     btn.disabled = false;
 }
 
-// --- FUNCIÓN PARA BUSCAR Y CARGAR POR NOMBRE ---
 async function cargarObraPorNombre() {
     const nombreABuscar = prompt("🔍 Introduce el NOMBRE DE LA OBRA que deseas cargar:");
     if (nombreABuscar === null || nombreABuscar.trim() === "") return; 
