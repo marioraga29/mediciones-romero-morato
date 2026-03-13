@@ -186,12 +186,11 @@ async function generarPDF() {
         const numDoc = document.getElementById('numDocumento').value || "---";
         const obra = document.getElementById('obra').value || "SIN NOMBRE";
         const trabajador = document.getElementById('trabajador').value || "NO ESPECIFICADO";
-        
         const fechaRaw = document.getElementById('fecha').value;
         const fecha = fechaRaw.split('-').reverse().join('/'); 
-        
         const notas = document.getElementById('notas').value;
 
+        // Cabecera y Estilos
         doc.setDrawColor(0); 
         doc.setLineWidth(0.6);
         doc.line(14, 40, 196, 40); 
@@ -225,6 +224,7 @@ async function generarPDF() {
         doc.text(`TRABAJADOR: ${trabajador.toUpperCase()}`, 14, 66);
         doc.text(`FECHA: ${fecha}`, 150, 54);
 
+        // Procesamiento de partidas
         const partidasPorTipo = {};
         let totalGeneralDinero = 0;
 
@@ -232,7 +232,6 @@ async function generarPDF() {
             const t = fila.querySelector('.tipo-material').value;
             const selectS = fila.querySelector('.subtipo-material');
             const manualS = fila.querySelector('.subtipo-manual').value;
-            
             let s = (selectS.value === "MANUAL") ? manualS : selectS.value;
 
             const anc = parseFloat(fila.querySelector('.ancho').value) || 0;
@@ -241,9 +240,7 @@ async function generarPDF() {
             const totM2 = anc * alt * lar;
 
             if (t && s) {
-                if (!partidasPorTipo[t]) {
-                    partidasPorTipo[t] = [];
-                }
+                if (!partidasPorTipo[t]) { partidasPorTipo[t] = []; }
                 let filaDatos = [s, anc.toFixed(2), alt.toFixed(2), lar.toFixed(2), `${totM2.toFixed(2)} m²`];
                 
                 if (mostrarCostes) {
@@ -258,10 +255,9 @@ async function generarPDF() {
 
         const filasFinalesPDF = [];
         for (const tipo in partidasPorTipo) {
-            let totalM2Tipo = 0; // Calculamos el total de m2 de este bloque
+            let totalM2Tipo = 0;
             const numColumnas = mostrarCostes ? 7 : 5;
             
-            // Fila de Encabezado de Tipo
             const filaTipo = [];
             for (let i = 0; i < numColumnas; i++) {
                 filaTipo.push({
@@ -271,25 +267,17 @@ async function generarPDF() {
             }
             filasFinalesPDF.push(filaTipo);
 
-            // Añadir partidas y sumar m2
             partidasPorTipo[tipo].forEach(partida => { 
                 filasFinalesPDF.push(partida); 
                 const m2Valor = parseFloat(partida[4].split(' ')[0]) || 0;
                 totalM2Tipo += m2Valor;
             });
 
-            // Fila de Subtotal del Tipo (NUEVA)
             const filaSubtotal = [];
             for (let i = 0; i < numColumnas; i++) {
                 filaSubtotal.push({
                     content: (i === 0) ? `TOTAL ${tipo.toUpperCase()}:` : (i === 4) ? `${totalM2Tipo.toFixed(2)} m²` : "",
-                    styles: { 
-                        fillColor: [255, 255, 255], 
-                        fontStyle: 'bold', 
-                        textColor: [0, 0, 0], 
-                        halign: (i === 4) ? 'right' : 'left',
-                        fontSize: 9
-                    }
+                    styles: { fillColor: [255, 255, 255], fontStyle: 'bold', textColor: [0, 0, 0], halign: (i === 4) ? 'right' : 'left', fontSize: 9 }
                 });
             }
             filasFinalesPDF.push(filaSubtotal);
@@ -335,15 +323,27 @@ async function generarPDF() {
             finalY += 15;
         }
 
+        // --- SECCIÓN DE NOTAS MEJORADA CON SALTO DE PÁGINA ---
         if (notas.trim() !== "") {
-            const posNotas = finalY + 10;
+            const pageHeight = doc.internal.pageSize.height;
+            let posNotas = finalY + 15;
+            
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
+            
+            const splitNotas = doc.splitTextToSize(notas, 180);
+            const alturaNotas = (splitNotas.length * 5) + 10;
+
+            // Si no cabe (margen inferior de 25mm), saltar página
+            if (posNotas + alturaNotas > pageHeight - 25) {
+                doc.addPage();
+                posNotas = 25;
+            }
+
             doc.text("OBSERVACIONES:", 14, posNotas);
             doc.setFont(undefined, 'normal');
             doc.setFontSize(9);
-            const splitNotas = doc.splitTextToSize(notas, 180);
-            doc.text(splitNotas, 14, posNotas + 5);
+            doc.text(splitNotas, 14, posNotas + 7);
         }
 
         const pageCount = doc.internal.getNumberOfPages();
@@ -365,7 +365,6 @@ async function generarPDF() {
 // --- FUNCIÓN PARA GUARDAR EL FORMULARIO ---
 async function guardarEnNube() {
     const nombreObra = document.getElementById('obra').value.trim();
-    
     if (!nombreObra) {
         alert("⚠️ Por favor, escribe un nombre en el campo 'OBRA' para poder guardar.");
         return;
@@ -376,18 +375,16 @@ async function guardarEnNube() {
     btn.innerHTML = "⏳ GUARDANDO...";
     btn.disabled = true;
 
-    // Capturamos todo el estado actual del formulario
     const estadoFormulario = {
         numDocumento: document.getElementById('numDocumento').value,
         obra: nombreObra,
         trabajador: document.getElementById('trabajador').value,
         fecha: document.getElementById('fecha').value,
         notas: document.getElementById('notas').value,
-        mostrarCostes: mostrarCostes, // Variable global de tu código
+        mostrarCostes: mostrarCostes,
         filas: []
     };
 
-    // Recorremos las filas de la tabla para guardar cada partida
     document.querySelectorAll('#filas-medicion tr').forEach(fila => {
         estadoFormulario.filas.push({
             tipo: fila.querySelector('.tipo-material').value,
@@ -400,13 +397,9 @@ async function guardarEnNube() {
         });
     });
 
-    // Enviamos a la tabla 'lista-partidas' de Supabase
     const { data, error } = await _supabase
         .from('lista-partidas')
-        .insert([{ 
-            nombre_obra: nombreObra, 
-            datos: estadoFormulario 
-        }]);
+        .insert([{ nombre_obra: nombreObra, datos: estadoFormulario }]);
 
     if (error) {
         alert("❌ Error al guardar: " + error.message);
@@ -420,20 +413,14 @@ async function guardarEnNube() {
 
 // --- FUNCIÓN PARA BUSCAR Y CARGAR POR NOMBRE ---
 async function cargarObraPorNombre() {
-    // 1. Pedimos el nombre de la obra con una ventana emergente
     const nombreABuscar = prompt("🔍 Introduce el NOMBRE DE LA OBRA que deseas cargar:");
-
-    // Si el usuario cancela o deja vacío, no hacemos nada
-    if (nombreABuscar === null || nombreABuscar.trim() === "") {
-        return; 
-    }
+    if (nombreABuscar === null || nombreABuscar.trim() === "") return; 
 
     const btn = document.getElementById('btnCargar');
     const textoOriginal = btn.innerHTML;
     btn.innerHTML = "⏳ BUSCANDO...";
     btn.disabled = true;
 
-    // 2. Buscamos en Supabase (asegúrate que el nombre de tabla sea lista-partidas)
     const { data, error } = await _supabase
         .from('lista-partidas') 
         .select('*')
@@ -444,55 +431,40 @@ async function cargarObraPorNombre() {
     if (error) {
         alert("❌ Error en la base de datos: " + error.message);
     } else if (!data || data.length === 0) {
-        alert("❓ No se encontró la obra: '" + nombreABuscar + "'\n\nRevisa si el nombre es correcto.");
+        alert("❓ No se encontró la obra: '" + nombreABuscar + "'");
     } else {
-        // 3. Si existe, cargamos los datos
         const guardado = data[0].datos;
-        
-        // Limpiamos la tabla para que no se mezclen datos antiguos
         document.getElementById('filas-medicion').innerHTML = "";
 
-        // Rellenamos la cabecera (incluyendo el nombre de la obra que acabamos de traer)
         document.getElementById('obra').value = guardado.obra || nombreABuscar;
         document.getElementById('numDocumento').value = guardado.numDocumento || "";
         document.getElementById('trabajador').value = guardado.trabajador || "";
         document.getElementById('fecha').value = guardado.fecha || "";
         document.getElementById('notas').value = guardado.notas || "";
 
-        // Ajustamos la vista de costes según se guardó
-        if (guardado.mostrarCostes !== mostrarCostes) {
-            activarCostes();
-        }
+        if (guardado.mostrarCostes !== mostrarCostes) { activarCostes(); }
 
-        // Reconstruimos todas las filas
         guardado.filas.forEach(f => {
             agregarFila();
             const filas = document.querySelectorAll('#filas-medicion tr');
             const ultimaFila = filas[filas.length - 1];
-
             ultimaFila.querySelector('.tipo-material').value = f.tipo;
             actualizarSubtipos(ultimaFila.querySelector('.tipo-material'));
             ultimaFila.querySelector('.subtipo-material').value = f.subtipo;
-            
             if (f.subtipo === "MANUAL") {
                 const manual = ultimaFila.querySelector('.subtipo-manual');
                 manual.style.display = 'block';
                 manual.value = f.subtipoManual;
             }
-
             ultimaFila.querySelector('.ancho').value = f.ancho;
             ultimaFila.querySelector('.alto').value = f.alto;
             ultimaFila.querySelector('.largo').value = f.largo;
-            
             const pUnit = ultimaFila.querySelector('.precio-unitario');
             if (pUnit) pUnit.value = f.precio;
-            
             calcularFila(ultimaFila.querySelector('.ancho'));
         });
-
-        alert("✅ Obra '" + nombreABuscar + "' cargada con éxito.");
+        alert("✅ Obra cargada con éxito.");
     }
-
     btn.innerHTML = textoOriginal;
     btn.disabled = false;
 }
