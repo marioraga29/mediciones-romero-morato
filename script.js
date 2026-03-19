@@ -1,20 +1,8 @@
-// --- CONFIGURACIÓN SUPABASE ---
-const supabaseUrl = 'https://dfcjsnfjetypsnvvbbeg.supabase.co';
-const supabaseKey = 'sb_publishable_AiDH1cvaTp2XZy0Bb7aQ-g_XGH-hUph';
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
+// --- DATOS LOCALES ---
 const datosPartidas = {
-    "Escayola": ["Tabica escayola dos caras","Tabica escayola tres caras",
-        "Tabica escayola una cara","Techo de escayola"
-    ],
-    "Mortero": [
-        "Mortero a dos capas","Mortero maestreado","Tabica mortero dos caras",
-        "Tabica mortero tres caras","Tabica mortero una cara","Techo mortero"
-    ],
-    "Perlita": [
-        "Perliyeso maestreado","Perliyeso semimaestreado","Tabica perliyeso dos caras",
-        "Tabica perliyeso tres caras","Tabica perliyeso una cara","Techo perliyeso"
-    ],
+    "Escayola": ["Tabica escayola dos caras","Tabica escayola tres caras", "Tabica escayola una cara","Techo de escayola"],
+    "Mortero": ["Mortero a dos capas","Mortero maestreado","Tabica mortero dos caras", "Tabica mortero tres caras","Tabica mortero una cara","Techo mortero"],
+    "Perlita": ["Perliyeso maestreado","Perliyeso semimaestreado","Tabica perliyeso dos caras", "Tabica perliyeso tres caras","Tabica perliyeso una cara","Techo perliyeso"],
     "Pladur": [
         "Dif en placa hidrofuga en 13","Dif en placa hidrofuga en 15","Fosa de pladur de 5 x 5 hidrofuga",
         "Fosas de pladur de 5 x 5","Lana mineral vidrio 50 mm","Refuerzo de rejilla + apertura + colocación",
@@ -36,9 +24,7 @@ const datosPartidas = {
         "Trasdosado (70 + 2 x 13) MOD 400","Trasdosado (70 + 2 x 13) MOD 600",
         "Trasdosado con omega MOD 400 con placa de 15","Trasdosado con omega MOD 600 con placa de 15"
     ],
-    "Puente de unión": [
-        "Puente de unión"
-    ],
+    "Puente de unión": ["Puente de unión"],
     "Otro": []
 };
 
@@ -182,7 +168,6 @@ async function generarPDF() {
 
     try {
         const logo = await cargarImagen('logo.png');
-
         const numDoc = document.getElementById('numDocumento').value || "---";
         const obra = document.getElementById('obra').value || "SIN NOMBRE";
         const trabajador = document.getElementById('trabajador').value || "NO ESPECIFICADO";
@@ -190,7 +175,6 @@ async function generarPDF() {
         const fecha = fechaRaw.split('-').reverse().join('/'); 
         const notas = document.getElementById('notas').value;
 
-        // Cabecera y Estilos
         doc.setDrawColor(0); 
         doc.setLineWidth(0.6);
         doc.line(14, 40, 196, 40); 
@@ -310,7 +294,7 @@ async function generarPDF() {
             headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.3, fontStyle: 'bold', halign: 'center' },
             styles: { lineColor: [120, 120, 120], lineWidth: 0.2, textColor: [0, 0, 0], fontSize: 9, cellPadding: 3 },
             columnStyles: estilosColumnas,
-            margin: { top: 72, bottom: 60 } // Margen inferior para no tapar las firmas fijas
+            margin: { top: 72, bottom: 60 }
         });
 
         let finalY = doc.lastAutoTable.finalY;
@@ -322,14 +306,12 @@ async function generarPDF() {
             finalY += 15;
         }
 
-        // --- NOTAS (Se ajustan si hay poco espacio) ---
         const pageHeight = doc.internal.pageSize.height;
         if (notas.trim() !== "") {
             let posNotas = finalY + 15;
             const splitNotas = doc.splitTextToSize(notas, 180);
             const alturaNotas = (splitNotas.length * 5) + 10;
 
-            // Si las notas van a pisar el área de firmas fijas (menos de 60mm del final)
             if (posNotas + alturaNotas > pageHeight - 60) {
                 doc.addPage();
                 posNotas = 25;
@@ -342,24 +324,18 @@ async function generarPDF() {
             doc.text(splitNotas, 14, posNotas + 7);
         }
 
-        // --- FIRMAS FIJAS AL FINAL (PIE DE PÁGINA ÚLTIMA HOJA) ---
-        // Ponemos las firmas siempre a la misma altura desde el borde inferior
         const yFirma = pageHeight - 40; 
-
-        doc.setPage(doc.internal.getNumberOfPages()); // Asegurar que pintamos en la última página creada
+        doc.setPage(doc.internal.getNumberOfPages());
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(0);
 
-        // Firma Contrata (Izquierda)
         doc.line(20, yFirma, 85, yFirma); 
         doc.text("CONTRATA", 52.5, yFirma + 7, { align: 'center' });
 
-        // Firma Subcontrata (Derecha)
         doc.line(125, yFirma, 190, yFirma); 
         doc.text("SUBCONTRATA", 157.5, yFirma + 7, { align: 'center' });
 
-        // Numeración de páginas
         const pageCount = doc.internal.getNumberOfPages();
         for(let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
@@ -376,7 +352,8 @@ async function generarPDF() {
     }
 }
 
-// --- RESTO DE FUNCIONES (Guardar y Cargar) SE MANTIENEN IGUAL ---
+// --- FUNCIONES SEGURAS CON VERCEL (NUEVAS) ---
+
 async function guardarEnNube() {
     const nombreObra = document.getElementById('obra').value.trim();
     if (!nombreObra) {
@@ -411,18 +388,24 @@ async function guardarEnNube() {
         });
     });
 
-    const { data, error } = await _supabase
-        .from('lista-partidas')
-        .insert([{ nombre_obra: nombreObra, datos: estadoFormulario }]);
+    try {
+        const response = await fetch('/api/db', {
+            method: 'POST',
+            body: JSON.stringify({ nombre_obra: nombreObra, datos: estadoFormulario })
+        });
 
-    if (error) {
-        alert("❌ Error al guardar: " + error.message);
-    } else {
-        alert("✅ Obra '" + nombreObra + "' guardada correctamente.");
+        if (response.ok) {
+            alert("✅ Obra '" + nombreObra + "' guardada correctamente.");
+        } else {
+            const err = await response.json();
+            alert("❌ Error al guardar: " + (err.error || "Error en el servidor"));
+        }
+    } catch (e) {
+        alert("❌ Error de conexión con el servidor.");
+    } finally {
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
     }
-    
-    btn.innerHTML = textoOriginal;
-    btn.disabled = false;
 }
 
 async function cargarObraPorNombre() {
@@ -434,50 +417,49 @@ async function cargarObraPorNombre() {
     btn.innerHTML = "⏳ BUSCANDO...";
     btn.disabled = true;
 
-    const { data, error } = await _supabase
-        .from('lista-partidas') 
-        .select('*')
-        .eq('nombre_obra', nombreABuscar.trim()) 
-        .order('created_at', { ascending: false }) 
-        .limit(1);
+    try {
+        const response = await fetch(`/api/db?nombre=${encodeURIComponent(nombreABuscar.trim())}`);
+        const data = await response.json();
 
-    if (error) {
-        alert("❌ Error en la base de datos: " + error.message);
-    } else if (!data || data.length === 0) {
-        alert("❓ No se encontró la obra: '" + nombreABuscar + "'");
-    } else {
-        const guardado = data[0].datos;
-        document.getElementById('filas-medicion').innerHTML = "";
+        if (!data || data.length === 0) {
+            alert("❓ No se encontró la obra: '" + nombreABuscar + "'");
+        } else {
+            const guardado = data[0].datos;
+            document.getElementById('filas-medicion').innerHTML = "";
 
-        document.getElementById('obra').value = guardado.obra || nombreABuscar;
-        document.getElementById('numDocumento').value = guardado.numDocumento || "";
-        document.getElementById('trabajador').value = guardado.trabajador || "";
-        document.getElementById('fecha').value = guardado.fecha || "";
-        document.getElementById('notas').value = guardado.notas || "";
+            document.getElementById('obra').value = guardado.obra || nombreABuscar;
+            document.getElementById('numDocumento').value = guardado.numDocumento || "";
+            document.getElementById('trabajador').value = guardado.trabajador || "";
+            document.getElementById('fecha').value = guardado.fecha || "";
+            document.getElementById('notas').value = guardado.notas || "";
 
-        if (guardado.mostrarCostes !== mostrarCostes) { activarCostes(); }
+            if (guardado.mostrarCostes !== mostrarCostes) { activarCostes(); }
 
-        guardado.filas.forEach(f => {
-            agregarFila();
-            const filas = document.querySelectorAll('#filas-medicion tr');
-            const ultimaFila = filas[filas.length - 1];
-            ultimaFila.querySelector('.tipo-material').value = f.tipo;
-            actualizarSubtipos(ultimaFila.querySelector('.tipo-material'));
-            ultimaFila.querySelector('.subtipo-material').value = f.subtipo;
-            if (f.subtipo === "MANUAL") {
-                const manual = ultimaFila.querySelector('.subtipo-manual');
-                manual.style.display = 'block';
-                manual.value = f.subtipoManual;
-            }
-            ultimaFila.querySelector('.ancho').value = f.ancho;
-            ultimaFila.querySelector('.alto').value = f.alto;
-            ultimaFila.querySelector('.largo').value = f.largo;
-            const pUnit = ultimaFila.querySelector('.precio-unitario');
-            if (pUnit) pUnit.value = f.precio;
-            calcularFila(ultimaFila.querySelector('.ancho'));
-        });
-        alert("✅ Obra cargada con éxito.");
+            guardado.filas.forEach(f => {
+                agregarFila();
+                const filas = document.querySelectorAll('#filas-medicion tr');
+                const ultimaFila = filas[filas.length - 1];
+                ultimaFila.querySelector('.tipo-material').value = f.tipo;
+                actualizarSubtipos(ultimaFila.querySelector('.tipo-material'));
+                ultimaFila.querySelector('.subtipo-material').value = f.subtipo;
+                if (f.subtipo === "MANUAL") {
+                    const manual = ultimaFila.querySelector('.subtipo-manual');
+                    manual.style.display = 'block';
+                    manual.value = f.subtipoManual;
+                }
+                ultimaFila.querySelector('.ancho').value = f.ancho;
+                ultimaFila.querySelector('.alto').value = f.alto;
+                ultimaFila.querySelector('.largo').value = f.largo;
+                const pUnit = ultimaFila.querySelector('.precio-unitario');
+                if (pUnit) pUnit.value = f.precio;
+                calcularFila(ultimaFila.querySelector('.ancho'));
+            });
+            alert("✅ Obra cargada con éxito.");
+        }
+    } catch (e) {
+        alert("❌ Error al conectar con el servidor.");
+    } finally {
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
     }
-    btn.innerHTML = textoOriginal;
-    btn.disabled = false;
 }
