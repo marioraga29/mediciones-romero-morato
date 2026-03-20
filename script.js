@@ -1,3 +1,6 @@
+// --- VARIABLES GLOBALES DE SEGURIDAD ---
+let accesoAutorizado = ""; 
+
 // --- DATOS LOCALES ---
 const datosPartidas = {
     "Escayola": ["Tabica escayola dos caras","Tabica escayola tres caras", "Tabica escayola una cara","Techo de escayola"],
@@ -352,9 +355,14 @@ async function generarPDF() {
     }
 }
 
-// --- FUNCIONES SEGURAS CON VERCEL (NUEVAS) ---
+// --- FUNCIONES SEGURAS CON VERCEL---
 
 async function guardarEnNube() {
+    if (!accesoAutorizado) {
+        accesoAutorizado = prompt("🔑 Introduce la CLAVE MAESTRA para guardar:");
+        if (!accesoAutorizado) return;
+    }
+
     const nombreObra = document.getElementById('obra').value.trim();
     if (!nombreObra) {
         alert("⚠️ Por favor, escribe un nombre en el campo 'OBRA' para poder guardar.");
@@ -391,11 +399,18 @@ async function guardarEnNube() {
     try {
         const response = await fetch('/api/db', {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': accesoAutorizado // <-- MANDAMOS LA CLAVE
+            },
             body: JSON.stringify({ nombre_obra: nombreObra, datos: estadoFormulario })
         });
 
         if (response.ok) {
             alert("✅ Obra '" + nombreObra + "' guardada correctamente.");
+        } else if (response.status === 401) {
+            accesoAutorizado = ""; // Limpiar clave incorrecta
+            alert("❌ Clave de seguridad incorrecta.");
         } else {
             const err = await response.json();
             alert("❌ Error al guardar: " + (err.error || "Error en el servidor"));
@@ -409,6 +424,12 @@ async function guardarEnNube() {
 }
 
 async function cargarObraPorNombre() {
+    // Pedir clave si no hay
+    if (!accesoAutorizado) {
+        accesoAutorizado = prompt("🔑 Introduce la CLAVE MAESTRA para cargar:");
+        if (!accesoAutorizado) return;
+    }
+
     const nombreABuscar = prompt("🔍 Introduce el NOMBRE DE LA OBRA que deseas cargar:");
     if (nombreABuscar === null || nombreABuscar.trim() === "") return; 
 
@@ -418,7 +439,18 @@ async function cargarObraPorNombre() {
     btn.disabled = true;
 
     try {
-        const response = await fetch(`/api/db?nombre=${encodeURIComponent(nombreABuscar.trim())}`);
+        const response = await fetch(`/api/db?nombre=${encodeURIComponent(nombreABuscar.trim())}`, {
+            headers: {
+                'x-api-key': accesoAutorizado // <-- MANDAMOS LA CLAVE
+            }
+        });
+
+        if (response.status === 401) {
+            accesoAutorizado = "";
+            alert("❌ Clave de seguridad incorrecta.");
+            return;
+        }
+
         const data = await response.json();
 
         if (!data || data.length === 0) {
