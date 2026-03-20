@@ -424,14 +424,14 @@ async function guardarEnNube() {
 }
 
 async function cargarObraPorNombre() {
-    // Pedir clave si no hay
+    const nombreABuscar = prompt("🔍 Introduce el NOMBRE DE LA OBRA que deseas cargar:");
+    
+    if (nombreABuscar === null || nombreABuscar.trim() === "") return; 
+
     if (!accesoAutorizado) {
-        accesoAutorizado = prompt("🔑 Introduce la CLAVE MAESTRA para cargar:");
+        accesoAutorizado = prompt("🔑 Introduce la CLAVE MAESTRA para autorizar la búsqueda:");
         if (!accesoAutorizado) return;
     }
-
-    const nombreABuscar = prompt("🔍 Introduce el NOMBRE DE LA OBRA que deseas cargar:");
-    if (nombreABuscar === null || nombreABuscar.trim() === "") return; 
 
     const btn = document.getElementById('btnCargar');
     const textoOriginal = btn.innerHTML;
@@ -441,13 +441,14 @@ async function cargarObraPorNombre() {
     try {
         const response = await fetch(`/api/db?nombre=${encodeURIComponent(nombreABuscar.trim())}`, {
             headers: {
-                'x-api-key': accesoAutorizado // <-- MANDAMOS LA CLAVE
+                'x-api-key': accesoAutorizado 
             }
         });
 
+        // 3. Si la contraseña estaba mal, avisamos inmediatamente
         if (response.status === 401) {
-            accesoAutorizado = "";
-            alert("❌ Clave de seguridad incorrecta.");
+            accesoAutorizado = ""; // Borramos la clave para que la pida bien la próxima vez
+            alert("❌ Clave de seguridad incorrecta. No se ha podido realizar la búsqueda.");
             return;
         }
 
@@ -458,7 +459,6 @@ async function cargarObraPorNombre() {
         } else {
             const guardado = data[0].datos;
             document.getElementById('filas-medicion').innerHTML = "";
-
             document.getElementById('obra').value = guardado.obra || nombreABuscar;
             document.getElementById('numDocumento').value = guardado.numDocumento || "";
             document.getElementById('trabajador').value = guardado.trabajador || "";
@@ -486,7 +486,7 @@ async function cargarObraPorNombre() {
                 if (pUnit) pUnit.value = f.precio;
                 calcularFila(ultimaFila.querySelector('.ancho'));
             });
-            alert("✅ Obra cargada con éxito.");
+            alert("✅ Obra '" + nombreABuscar + "' cargada con éxito.");
         }
     } catch (e) {
         alert("❌ Error al conectar con el servidor.");
